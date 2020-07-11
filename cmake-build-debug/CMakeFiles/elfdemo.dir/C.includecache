@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/austen/Develop/project/clion/elfdemo/elf.h
+stdint.h
+-
+
+/Users/austen/Develop/project/clion/elfdemo/main.c
+stdio.h
+-
+elf.h
+/Users/austen/Develop/project/clion/elfdemo/elf.h
+
