@@ -3217,6 +3217,6 @@ typedef Elf32_Addr Elf32_Conflict;
 #define R_TILEGX_NUM		130
 
 
-__END_DECLS
+//__END_DECLS
 
 #endif	/* elf.h */

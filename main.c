@@ -4,11 +4,16 @@
 
 #include <stdio.h>
 #include "elf.h"
+#include "malloc.h"
 
 
 void checkElffile(FILE *file);
 
 void printfElf64_Message(FILE *file);
+
+void printf_Elf64_Ehdr_Message(FILE *file, unsigned int offset, unsigned int count, uint16_t shstrndx);
+
+void printf_Elf64_Shadr_Message(FILE *file, long offset, unsigned int count, uint16_t shstrndx);
 
 void runElfParse(void) {
     FILE *file = NULL;
@@ -57,33 +62,33 @@ void printfElf64_Message(FILE *file) {
     if (1 == fread(&elf64Ehdr, sizeof(Elf64_Ehdr), 1, file)) {
         /* Legal values for e_type (object file type).  */
         printf("Header------------\n");
-        printf("æ–‡ä»¶ç±»å‹ï¼š");
+        printf("ÎÄ¼şÀàĞÍ£º");
         switch (elf64Ehdr.e_type) {
             case ET_NONE:
-                printf(" No file type  -- æ²¡æœ‰æ–‡ä»¶ç±»å‹ï¼");
+                printf(" No file type  -- Ã»ÓĞÎÄ¼şÀàĞÍ£¡");
                 break;
             case ET_REL:
-                printf("Relocatable file -- å¯é‡å®šä½æ–‡ä»¶");
+                printf("Relocatable file -- ¿ÉÖØ¶¨Î»ÎÄ¼ş");
                 break;
             case ET_EXEC:
-                printf("Executable file  -- å¯æ‰§è¡Œæ–‡ä»¶");
+                printf("Executable file  -- ¿ÉÖ´ĞĞÎÄ¼ş");
                 break;
             case ET_DYN:
-                printf("Shared object file -- å…±äº«ç›®æ ‡æ–‡ä»¶");
+                printf("Shared object file -- ¹²ÏíÄ¿±êÎÄ¼ş");
                 break;
             case ET_CORE:
-                printf("Core file -- æ ¸å¿ƒè½¬å‚¨æ–‡ä»¶");
+                printf("Core file -- ºËĞÄ×ª´¢ÎÄ¼ş");
                 break;
         }
         //Legal values for e_machine (architecture).
-        printf("\næœºå™¨ç±»å‹ï¼š");
+        printf("\n»úÆ÷ÀàĞÍ£º");
         switch (elf64Ehdr.e_machine) {
             case EM_X86_64:
                 printf("AMD x86-64 architecture(Advanced Micro Devices X86-64)");
                 break;
         }
 
-        printf("\nELF ç‰ˆæœ¬å·ï¼š");
+        printf("\nELF °æ±¾ºÅ£º");
         switch (elf64Ehdr.e_version) {
             case EV_NONE:
                 printf("Invalid ELF version");
@@ -95,21 +100,53 @@ void printfElf64_Message(FILE *file) {
                 printf("");
                 break;
         }
-        //TODO åé¢å°†å…¶åšæˆè¡¨
-        printf("\nå…¥å£åœ°å€ï¼š0x%llx", elf64Ehdr.e_entry);
+        //TODO ºóÃæ½«Æä×ö³É±í
+        printf("\nÈë¿ÚµØÖ·£º0x%llx", elf64Ehdr.e_entry);
 
         //Program header table file offset
-        printf("\nStart of program headersï¼š%lld", elf64Ehdr.e_phoff);
+        printf("\nStart of program headers£º%lld", elf64Ehdr.e_phoff);
 
 
-        printf("\næ®µè¡¨ï¼ˆsection tableï¼‰åœ¨æ–‡ä»¶ä¸­çš„åç§»ï¼š%lld", elf64Ehdr.e_shoff);
-        printf("\nå¤„ç†å™¨ç‰¹æ®Šæ ‡è®° Flags ï¼š0x%x", elf64Ehdr.e_flags);
+        printf("\n¶Î±í£¨section table£©ÔÚÎÄ¼şÖĞµÄÆ«ÒÆ£º%lld", elf64Ehdr.e_shoff);
+        printf("\n´¦ÀíÆ÷ÌØÊâ±ê¼Ç Flags £º0x%x", elf64Ehdr.e_flags);
+        printf("\nELFÎÄ¼ş head Õ¼ÓÃ: %d ×Ö½Ú", elf64Ehdr.e_ehsize);
+        printf("\n³ÌĞòÍ·ÌõÄ¿´óĞ¡£º%d ×Ö½Ú", elf64Ehdr.e_phentsize);
+        printf("\n³ÌĞòÍ·ÌõÄ¿Êı£º%d ¸ö", elf64Ehdr.e_phnum);
+        printf("\n¶Î±íÃèÊö·ûµÄ´óĞ¡£º%d ×Ö½Ú", elf64Ehdr.e_shentsize);
+        printf("\n¶Î±íÃèÊö·ûÊıÁ¿£º%d ¸ö", elf64Ehdr.e_shnum);
+        //TODO º¬Òå²»Çå
+        printf("\n¶Î±í×Ö·û´®±íËùÔÚµÄ¶ÎÔÚ¶Î±íÖĞµÄÏÂ±ê£º%d ", elf64Ehdr.e_shstrndx);
 
 
+//        rewind(file);
+//        fseek(file, sizeof(Elf64_Ehdr), SEEK_SET);
+//        Elf64_Shdr elf64Shdr[elf64Ehdr.e_shnum];
+//
+//        size_t reslut = fread(&elf64Shdr, sizeof(Elf64_Shdr), elf64Ehdr.e_shnum, file);
+//        if (reslut == 1) {
+//            printf("\nSuccess!");
+//        } else {
+//            printf("Error!");
+//        }
+        printf_Elf64_Shadr_Message(file, elf64Ehdr.e_shoff, elf64Ehdr.e_shnum, elf64Ehdr.e_shstrndx);
     }
 
-//    printf("struct %ld\n",sizeof(Elf64_Ehdr));
 
+}
+
+/**
+ *
+ */
+void printf_Elf64_Shadr_Message(FILE *file, long offset, unsigned int count, uint16_t shstrndx) {
+    fseek(file, offset, SEEK_SET);
+    printf("Section header from %ld bytes \n", ftell(file));
+
+    Elf64_Shdr *shdr = malloc(count * sizeof(Elf64_Shdr));
+
+    if (count == fread(shdr,sizeof(Elf64_Shdr),count,file)){
+        printf("\t[%2s]\t%-24s%-12s\t%-8s\t%-6s\t%-6s\t%2s\t%3s\t%2s\t%3s\t%2s\n",
+               "Nr", "Name", "Type", "Addr", "Off", "Size", "ES", "Flg", "Lk", "Inf", "Align");
+    }
 
 }
 
